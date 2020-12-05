@@ -1,4 +1,5 @@
-import { Router, Request, Response } from 'express';
+import { Router, Response } from 'express';
+import { IGetUserInfoRequest } from '../../models/Users';
 import middlewares from '../middlewares';
 const route = Router();
 
@@ -9,7 +10,7 @@ export default (app: Router) => {
     '/me',
     middlewares.isAuth,
     middlewares.attachCurrentUser,
-    (req: Request, res: Response) => {
+    (req: IGetUserInfoRequest, res: Response) => {
       return res.json({ user: req.currentUser }).status(200);
     },
   );

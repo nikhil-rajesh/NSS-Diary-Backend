@@ -1,7 +1,7 @@
 import mysql from 'mysql2/promise';
 import config from '../config';
 
-var pool = mysql.createPool({
+const pool = mysql.createPool({
   connectionLimit: 10,
   host: config.dbHost,
   user: config.dbUser,

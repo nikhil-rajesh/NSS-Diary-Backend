@@ -3,17 +3,19 @@ import config from '../config';
 import argon2 from 'argon2';
 import logger from '../loaders/logger';
 import db from '../loaders/db';
-import User from '../models/Users';
+import { User } from '../models/Users';
 
 export default class AuthService {
-  constructor() {}
-
   public async SignIn(username: string, password: string): Promise<{ user: User; token: string }> {
     try {
-      const res = await db.query('SELECT * FROM Users WHERE Users.username = ?', [username]);
-      if (res[0].length === 0) throw new Error('User not registered');
+      const results = await db.query('SELECT * FROM Users WHERE Users.username = ?', [username]);
+      const res = JSON.parse(JSON.stringify(results[0]));
 
-      const userRecord = JSON.parse(JSON.stringify(res[0][0]));
+      if (res.length === 0) {
+        throw new Error('User not registered');
+      }
+
+      const userRecord = res[0];
 
       /**
        * We use verify from argon2 to prevent 'timing based' attacks

@@ -1,5 +1,5 @@
 import db from '../../loaders/db';
-import User from '../../models/Users';
+import { User } from '../../models/Users';
 import Logger from '../../loaders/logger';
 
 /**
@@ -10,14 +10,16 @@ import Logger from '../../loaders/logger';
  */
 const attachCurrentUser = async (req, res, next) => {
   try {
-    const res = await db.query('SELECT * FROM Users WHERE Users.username = ?', [
+    const results = await db.query('SELECT * FROM Users WHERE Users.username = ?', [
       req.token.username,
     ]);
-    if (res[0].length === 0) {
+    const res = JSON.parse(JSON.stringify(results[0]));
+
+    if (res.length === 0) {
       return res.sendStatus(401);
     }
 
-    const currentUser = JSON.parse(JSON.stringify(res[0][0]));
+    const currentUser = res[0];
     Reflect.deleteProperty(currentUser, 'password');
     req.currentUser = currentUser;
     return next();
