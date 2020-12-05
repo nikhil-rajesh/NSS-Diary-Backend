@@ -1,6 +1,7 @@
 import db from '../../loaders/db';
-import { User } from '../../models/Users';
 import Logger from '../../loaders/logger';
+import { IGetUserInfoRequest } from '../../interfaces/Users';
+import { Response, NextFunction } from 'express';
 
 /**
  * Attach user to req.currentUser
@@ -8,7 +9,7 @@ import Logger from '../../loaders/logger';
  * @param {*} res  Express res Object
  * @param {*} next  Express next Function
  */
-const attachCurrentUser = async (req, res, next) => {
+const attachCurrentUser = async (req: IGetUserInfoRequest, res: Response, next: NextFunction) => {
   try {
     const results = await db.query('SELECT * FROM Users WHERE Users.username = ?', [
       req.token.username,

@@ -3,10 +3,13 @@ import config from '../config';
 import argon2 from 'argon2';
 import logger from '../loaders/logger';
 import db from '../loaders/db';
-import { User } from '../models/Users';
+import { IGetUserInfo } from '../interfaces/Users';
 
 export default class AuthService {
-  public async SignIn(username: string, password: string): Promise<{ user: User; token: string }> {
+  public async SignIn(
+    username: string,
+    password: string,
+  ): Promise<{ user: IGetUserInfo; token: string }> {
     try {
       const results = await db.query('SELECT * FROM Users WHERE Users.username = ?', [username]);
       const res = JSON.parse(JSON.stringify(results[0]));
@@ -38,7 +41,7 @@ export default class AuthService {
     }
   }
 
-  private generateToken(user) {
+  private generateToken(user: IGetUserInfo) {
     const today = new Date();
     const exp = new Date(today);
     exp.setDate(today.getDate() + 60);
@@ -62,5 +65,17 @@ export default class AuthService {
       },
       config.jwtSecret,
     );
+  }
+
+  public roleValue(role: string) {
+    if (role === 'SUPER_ADMIN') {
+      return 100;
+    } else if (role === 'CLASSROOM_ADMIN') {
+      return 10;
+    } else if (role === 'STUDENT') {
+      return 1;
+    } else {
+      return 0;
+    }
   }
 }

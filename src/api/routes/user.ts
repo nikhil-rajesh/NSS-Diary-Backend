@@ -1,5 +1,5 @@
 import { Router, Response } from 'express';
-import { IGetUserInfoRequest } from '../../models/Users';
+import { IGetUserInfoRequest } from '../../interfaces/Users';
 import middlewares from '../middlewares';
 const route = Router();
 
