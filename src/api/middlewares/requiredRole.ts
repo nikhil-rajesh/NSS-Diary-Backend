@@ -13,7 +13,7 @@ export default (requiredRole: string) => {
       logger.info('🔥 Welcome ' + requiredRole);
       return next();
     } else {
-      return res.status(401).send('Action not allowed');
+      return res.status(401).send('Insufficient Permissions');
     }
   };
 };
