@@ -1,5 +1,5 @@
 import { Router, Response, NextFunction } from 'express';
-import AdminService from '../../services/admin';
+import UserService from '../../services/user';
 import { celebrate, Joi } from 'celebrate';
 import logger from '../../loaders/logger';
 import { IGetUserInfoRequest } from '../../interfaces/Users';
@@ -35,8 +35,8 @@ export default (app: Router) => {
     async (req: IGetUserInfoRequest, res: Response, next: NextFunction) => {
       logger.debug('Calling User add endpoint with body: %o', req.body);
       try {
-        const adminServiceInstance = new AdminService();
-        const result = await adminServiceInstance.CreateUser(req.body);
+        const userServiceInstance = new UserService();
+        const result = await userServiceInstance.CreateUser(req.body);
         return res.json(result).status(200);
       } catch (e) {
         logger.error('🔥 error: %o', e);
