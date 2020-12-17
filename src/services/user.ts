@@ -4,7 +4,7 @@ import db from '../loaders/db';
 import { ICreateUser } from '../interfaces/Users';
 import { IDefaultResponse } from '../interfaces/Response';
 
-export default class AdminService {
+export default class UserService {
   public async CreateUser(user: ICreateUser): Promise<IDefaultResponse> {
     try {
       logger.silly('Hashing password');
