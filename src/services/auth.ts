@@ -61,6 +61,7 @@ export default class AuthService {
         username: user.username,
         user_type: user.user_type,
         name: user.name,
+        email: user.email,
         exp: exp.getTime() / 1000,
       },
       config.jwtSecret,

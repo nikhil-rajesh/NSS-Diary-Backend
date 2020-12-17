@@ -2,26 +2,24 @@ import { Router, Response, NextFunction } from 'express';
 import UserService from '../../services/user';
 import { celebrate, Joi } from 'celebrate';
 import logger from '../../loaders/logger';
-import { IGetUserInfoRequest } from '../../interfaces/Users';
 import middlewares from '../middlewares';
+import { IAuth } from '../../interfaces/Middleware';
+import { IGetUserInfo } from '../../interfaces/Users';
 const route = Router();
 
 export default (app: Router) => {
   app.use('/user', route);
 
-  route.get(
-    '/me',
-    middlewares.isAuth,
-    middlewares.attachCurrentUser,
-    (req: IGetUserInfoRequest, res: Response) => {
-      return res.json({ user: req.currentUser }).status(200);
-    },
-  );
+  route.get('/me', middlewares.isAuth, (req: IAuth, res: Response) => {
+    const user = { ...req.token };
+    Reflect.deleteProperty(user, 'exp');
+    Reflect.deleteProperty(user, 'iat');
+    return res.json(user as IGetUserInfo).status(200);
+  });
 
   route.post(
     '/add',
     middlewares.isAuth,
-    middlewares.attachCurrentUser,
     middlewares.requiredRole('SUPER_ADMIN'),
     celebrate({
       body: Joi.object({
@@ -32,7 +30,7 @@ export default (app: Router) => {
         user_type: Joi.string().valid('SUPER_ADMIN', 'CLASSROOM_ADMIN').required(),
       }),
     }),
-    async (req: IGetUserInfoRequest, res: Response, next: NextFunction) => {
+    async (req: IAuth, res: Response, next: NextFunction) => {
       logger.debug('Calling User add endpoint with body: %o', req.body);
       try {
         const userServiceInstance = new UserService();
