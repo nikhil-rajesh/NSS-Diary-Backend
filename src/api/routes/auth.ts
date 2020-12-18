@@ -29,4 +29,28 @@ export default (app: Router) => {
       }
     },
   );
+
+  route.post(
+    '/signup',
+    celebrate({
+      body: Joi.object({
+        username: Joi.string().required(),
+        email: Joi.string().email().required(),
+        name: Joi.string().required(),
+        password: Joi.string().required(),
+        classroom_code: Joi.string().required(),
+      }),
+    }),
+    async (req: Request, res: Response, next: NextFunction) => {
+      logger.debug('Calling Sign-Up endpoint with body: %o', req.body);
+      try {
+        const authServiceInstance = new AuthService();
+        const { user, token } = await authServiceInstance.SignUp(req.body);
+        return res.json({ user, token }).status(200);
+      } catch (e) {
+        logger.error('🔥 error: %o', e);
+        return next(e);
+      }
+    },
+  );
 };

@@ -12,3 +12,11 @@ export interface ICreateUser {
   user_type: string;
   password: string;
 }
+
+export interface ISignUpUser {
+  username: string;
+  email: string;
+  name: string;
+  password: string;
+  classroom_code: string;
+}

@@ -3,7 +3,7 @@ import config from '../config';
 import argon2 from 'argon2';
 import logger from '../loaders/logger';
 import db from '../loaders/db';
-import { IGetUserInfo } from '../interfaces/Users';
+import { IGetUserInfo, ISignUpUser } from '../interfaces/Users';
 
 export default class AuthService {
   public async SignIn(
@@ -38,6 +38,64 @@ export default class AuthService {
     } catch (e) {
       logger.error(e);
       throw e;
+    }
+  }
+
+  public async SignUp(user: ISignUpUser): Promise<{ user: IGetUserInfo; token: string }> {
+    let conn = null;
+    try {
+      conn = await db.getConnection();
+      logger.silly('Transaction Begin');
+      await conn.beginTransaction();
+
+      // Check if classroom_code is valid
+      logger.silly('Validating classroom_code');
+      const classInfo = await conn.query(
+        'SELECT * FROM Classroom WHERE Classroom.classroom_code = ?',
+        [user.classroom_code],
+      );
+      if (classInfo[0].length === 0) {
+        throw new Error('Invalid Classroom Code');
+      }
+
+      // Add user db record
+      logger.silly('Hashing password');
+      user.password = await argon2.hash(user.password);
+
+      logger.silly('Creating user db record');
+      const resUser = await conn.query('INSERT INTO Users VALUES (?, ?, ?, ?, ?)', [
+        user.username,
+        user.email,
+        user.name,
+        user.password,
+        'STUDENT',
+      ]);
+
+      // Add Student Metadata
+      logger.silly('Creating student_metadata db record');
+      const resMetadata = await conn.query(
+        'INSERT INTO Student_Metadata VALUES (?, 0, 0, ?, null)',
+        [user.username, user.classroom_code],
+      );
+
+      // Generating Token
+      const userRecord: IGetUserInfo = {
+        username: user.username,
+        name: user.name,
+        email: user.email,
+        user_type: 'STUDENT',
+      };
+      logger.silly('Generating JWT');
+      const token = this.generateToken(userRecord);
+
+      await conn.commit();
+      return { user: userRecord, token };
+    } catch (error) {
+      logger.error(error);
+      if (conn) await conn.rollback();
+      throw error;
+    } finally {
+      if (conn) await conn.release();
     }
   }
 
