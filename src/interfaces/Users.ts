@@ -20,3 +20,11 @@ export interface ISignUpUser {
   password: string;
   classroom_code: string;
 }
+
+export interface IStudentMetadata {
+  student: string;
+  farm_hours: string;
+  social_hours: string;
+  classroom_code: string;
+  project_name: string;
+}

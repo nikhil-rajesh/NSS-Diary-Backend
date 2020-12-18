@@ -10,11 +10,26 @@ const route = Router();
 export default (app: Router) => {
   app.use('/user', route);
 
-  route.get('/me', middlewares.isAuth, (req: IAuth, res: Response) => {
+  route.get('/me', middlewares.isAuth, async (req: IAuth, res: Response) => {
+    logger.debug('Calling /user/me endpoint with body');
+    var response = {};
+
     const user = { ...req.token };
     Reflect.deleteProperty(user, 'exp');
     Reflect.deleteProperty(user, 'iat');
-    return res.json(user as IGetUserInfo).status(200);
+    response = { user };
+
+    if (user.user_type === 'STUDENT') {
+      try {
+        const userServiceInstance = new UserService();
+        const metadata = await userServiceInstance.GetStudentMetadata(user.username);
+        response = { ...response, metadata };
+      } catch (e) {
+        logger.error(e);
+      }
+    }
+
+    return res.json(response).status(200);
   });
 
   route.post(
