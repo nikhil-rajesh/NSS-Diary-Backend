@@ -18,7 +18,6 @@ export default class UserService {
         user.password,
         user.user_type,
       ]);
-      console.log(results);
       return { success: true, message: 'User created' };
     } catch (e) {
       logger.error(e);
